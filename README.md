@@ -1,1 +1,1 @@
-# fundamental_ai_ml
+# Fundamental-AI-ML

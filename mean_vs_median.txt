@@ -1,0 +1,33 @@
+- Mean = (x1 + x2 + ... + xn) / n
+
+- Median হলো sorted data-এর middle value।
+
+ধরা যাক salary:
+40000
+45000
+50000
+55000
+1000000
+
+Mean = (40000 + 45000 + 50000 + 55000 + 1000000) / 5 = 238000
+
+Median = মোট 5টি value, তাই মাঝের value হলো: 50000
+
+Mean   = 238,000
+Median = 50,000
+
+number of values even হলে Median বের করার নিয়ম একটু আলাদা।
+
+যেমন:
+40,000
+45,000
+50,000
+55,000
+
+এখানে মোট 4টি value → even। মাঝখানে দুটি value: 45,000   50,000
+
+তাই Median: Median = (45,000 + 50,000) / 2 = 47,500
+
+- Rule
+Odd number of values → একদম মাঝের value = Median
+Even number of values → মাঝের দুইটি value-এর average = Median

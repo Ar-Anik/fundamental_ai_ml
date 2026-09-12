@@ -1,0 +1,147 @@
+-> Scalar
+একটি single numerical value: 5
+এটি scalar।
+
+Machine Learning-এ:
+learning_rate = 0.01
+এখানে 0.01 একটি scalar।
+
+-> Vector
+একটি ordered collection of numbers:
+x =
+[2
+ 4
+ 6]
+
+NumPy:
+x = np.array([2, 4, 6])
+
+ML-এ একটি sample-এর features vector হিসেবে represent করা যায়।
+
+উদাহরণ:
+Age = 25
+Experience = 3
+Salary = 50000
+
+একটি feature vector:
+x=[
+25
+3
+50000
+]
+
+-> Matrix
+একাধিক row এবং column-এর numerical structure।
+
+X =
+[25  3  50000
+ 30  5  70000
+ 28  4  60000]
+
+NumPy:
+X = np.array([
+    [25, 3, 50000],
+    [30, 5, 70000],
+    [28, 4, 60000]
+])
+
+এখানে:
+X.shape
+
+হবে:
+(3, 3)
+
+অর্থাৎ:
+3 samples
+3 features
+
+
+-> Tensor
+Tensor হলো generalized multi-dimensional numerical array।
+
+সহজভাবে:
+Scalar → 0D
+Vector → 1D
+Matrix → 2D
+Tensor → 3D বা তার বেশি dimension
+
+তবে terminology context-dependent এবং mathematical tensor-এর ধারণা শুধু "multi-dimensional array" দিয়ে সম্পূর্ণ সংজ্ঞায়িত হয় না।
+Deep Learning frameworks যেমন PyTorch এবং TensorFlow-তে tensor একটি central data structure।
+
+
+-> Shape
+AI/ML programming-এ অনেক Error shape mismatch থেকে আসে।
+
+ধরা যাক:
+X.shape == (100, 5)
+
+অর্থ:
+100 samples
+5 features
+
+Model-এর weight matrix-এর shape এবং input-এর shape compatible হতে হবে।
+
+তাই ML programming-এ বারবার:
+.shape দেখা হয়।
+
+
+-> Transpose
+
+Matrix:
+A =
+[1 2 3
+ 4 5 6]
+
+Transpose:
+A^T =
+[1 4
+ 2 5
+ 3 6]
+
+NumPy: A^T
+Transpose row এবং column-এর অবস্থান পরিবর্তন করে।
+
+-> Dot Product
+
+দুটি vector:
+a =
+[1
+ 2
+ 3]
+
+b =
+[4
+ 5
+ 6]
+
+Dot product:
+a · b
+= 1(4) + 2(5) + 3(6)
+= 4 + 10 + 18
+= 32
+
+NumPy:
+a = np.array([1, 2, 3])
+b = np.array([4, 5, 6])
+
+result = np.dot(a, b)
+অথবা:
+result = a @ b
+
+
+-> Matrix Multiplication
+এটি Neural Network-এর জন্য অত্যন্ত গুরুত্বপূর্ণ।
+
+ধরা যাক:
+X = [x₁  x₂] এবং
+W =
+[w₁
+ w₂]
+
+তাহলে:
+XW = x₁w₁ + x₂w₂
+
+এর সঙ্গে bias যোগ হলে:
+z = XW + b
+
+Neural network-এর একটি fundamental operation এরকম।

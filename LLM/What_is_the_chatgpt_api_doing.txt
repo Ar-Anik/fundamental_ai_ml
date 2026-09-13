@@ -1,0 +1,138 @@
+ধরা যাক FastAPI application আছে:
+
+     User
+      ↓
+    FastAPI
+      ↓
+    LLM API
+      ↓
+     LLM
+      ↓
+    Response
+
+User লিখল: Explain REST API.
+
+FastAPI এই question LLM API-এর মাধ্যমে model-এ পাঠায়।
+
+Conceptually:
+    question = "Explain REST API."
+            ↓
+        LLM API
+            ↓
+       LLM Model
+            ↓
+    "REST API is..."
+
+এখানে application LLM-এর কাছে information পাঠাচ্ছে।
+
+
+Q : System Instruction কী?
+-> LLM-কে শুধু user question পাঠানোতেই সবসময় ভালো result পাওয়া যায় না। Application model-কে কিছু instruction দিতে পারে।
+
+উদাহরণ:
+You are a company policy assistant. Answer only using the provided context. If the answer is not available in the context, say that you
+do not know.
+
+এটাকে সহজভাবে বলা যায়:
+Application model-কে কীভাবে behave করতে হবে সেই instruction দিচ্ছে।
+
+তারপর user question:
+How many annual leaves are available?
+
+
+Q : Context কী?
+-> Context হলো LLM-কে একটি প্রশ্নের উত্তর তৈরি করতে সাহায্য করার জন্য request-এর সাথে দেওয়া relevant information।
+
+অর্থাৎ:
+     Question + Relevant Information
+                ↓
+               LLM
+                ↓
+             Answer
+
+এখানে Relevant Information = Context।
+
+
+-> ধরা যাক একটি company-এর document আছে:
+
+Annual Leave Policy
+Employees receive 20 annual leave days per year.
+
+এখন user প্রশ্ন করল: How many annual leaves are available?
+
+এখানে প্রশ্নটির উত্তর document-এর মধ্যে আছে: Employees receive 20 annual leave days per year.
+
+এই information-টি LLM-কে দেওয়া হলে LLM বুঝতে পারবে: "এই প্রশ্নের উত্তর দেওয়ার জন্য এই information ব্যবহার করতে হবে।"
+
+তাই এই information-টিই Context।
+
+
+-> এখন LLM-কে যদি শুধু এই question পাঠানো হয়: How many annual leaves are available?
+
+তাহলে LLM জানে না কোন company-এর কথা বলা হচ্ছে। কারণ: How many annual leaves are available? এটি একটি general question।
+
+LLM-এর কাছে company-specific policy নেই। তাই application যদি company policy থেকে relevant information LLM-কে দেয়:
+        Employees receive 20 annual leave days per year.
+
+তখন LLM-এর কাছে question-এর সাথে প্রয়োজনীয় company-specific information-ও আছে।
+
+অর্থাৎ:
+
+Context:
+Employees receive 20 annual leave days per year.
+
+তারপর model input conceptually এমন:
+
+System:
+You are a company policy assistant.
+Answer only using the provided context.
+
+Context:
+Employees receive 20 annual leave days per year.
+
+User:
+How many annual leaves are available?
+
+
+-> Context Session/Cookie-এর মতো না
+Context হলো LLM request-এর input-এর অংশ। যেমন:
+
+LLM API Request
+{
+    "messages": [
+        {
+            "role": "system",
+            "content": "Answer using the provided context."
+        },
+        {
+            "role": "user",
+            "content": "Context: Employees receive 20 annual leave days.\n\nQuestion: How many annual leaves?"
+        }
+    ]
+}
+
+
+প্রথম case:
+
+    User
+     ↓
+    LLM
+     ↓
+    Answer
+
+এখানে LLM-এর কাছে company policy দেওয়া হয়নি।
+
+দ্বিতীয় case:
+
+    User
+     ↓
+  Application
+     ↓
+ Question + Relevant Company Information
+     ↓
+    LLM
+     ↓
+    Answer
+
+এখানে application আগে relevant information LLM-কে দিয়েছে। এই second approach-টাই RAG-এর basic idea-এর দিকে নিয়ে যায়।
+

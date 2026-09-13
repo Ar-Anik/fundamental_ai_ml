@@ -1,0 +1,274 @@
+Vector Database হলো এমন একটি database/system যেখানে data-এর vector representation store করা হয় এবং সেই vector-এর similarity অনুযায়ী relevant
+data খুঁজে বের করা যায়।
+
+
+Q : Vector-এর মানে কী?
+-> Vector হলো text-এর semantic information-এর numerical representation।
+অর্থাৎ:
+    Text
+     ↓
+    Embedding
+     ↓
+    Numbers
+
+এই numbers ব্যবহার করে semantic similarity calculate করা যায়।
+
+
+Q : Document থেকে Vector কীভাবে আসে?
+-> এখানে আগের RAG concept-এর সাথে connect করি। ধরা যাক document:
+
+Company Leave Policy
+Employees receive 20 annual leave days per year.
+Employees must submit leave requests through the HR portal.
+Manager approval is required for leave.
+
+পুরো document-কে সাধারণত ছোট ছোট chunks-এ ভাগ করা হয়।
+
+    Document
+       ↓
+    Chunking
+       ↓
+    Chunk 1
+    Chunk 2
+    Chunk 3
+
+ধরা যাক:
+Chunk 1:
+Employees receive 20 annual leave days per year.
+
+Chunk 2:
+Employees must submit leave requests through the HR portal.
+
+Chunk 3:
+Manager approval is required for leave.
+
+তারপর:
+    Chunk 1
+       ↓
+    Embedding
+       ↓
+    Vector 1
+
+    Chunk 2
+       ↓
+    Embedding
+       ↓
+    Vector 2
+
+    Chunk 3
+       ↓
+    Embedding
+       ↓
+    Vector 3
+
+তারপর:
+Vector 1 ──┐
+Vector 2 ──┼──→ Vector Database
+Vector 3 ──┘
+
+
+-> এখন suppose company-র 100,000 documents আছে। প্রতিটি document chunk করে embedding তৈরি করা হয়েছে।
+
+Document 1 → Vector 1
+Document 2 → Vector 2
+Document 3 → Vector 3
+...
+Document 100000 → Vector 100000
+
+এই vectors কোথায় রাখবে?
+
+এখানেই Vector Database / Vector Store।
+
+Conceptually:
+
+                 Vector Database
+
+Document 1  → [0.12, 0.55, -0.22, ...]
+Document 2  → [0.80, -0.10, 0.45, ...]
+Document 3  → [0.13, 0.51, -0.20, ...]
+Document 4  → [0.91, -0.30, 0.10, ...]
+...
+Document 100000 → [...]
+
+অর্থাৎ Vector Database:
+- vector store করে
+- vector-এর সাথে associated information রাখে
+- similarity search করতে সাহায্য করে
+
+
+-> বাস্তব RAG system-এ সাধারণত শুধু vector রাখলে যথেষ্ট নয়। একটি record conceptually এমন হতে পারে:
+
+ID:
+chunk_001
+
+Text:
+Employees receive 20 annual leave days.
+
+Embedding:
+[0.12, 0.55, -0.22, ...]
+
+Metadata:
+{
+    "source": "leave_policy.pdf",
+    "page": 4
+}
+
+অর্থাৎ: Vector + Original Text / Document Reference + Metadata একসাথে রাখা বা reference করা হয়।
+কারণ similarity search-এর পরে কোন text retrieve হয়েছে সেটাও দরকার।
+
+
+-> ধরা যাক একটি sentence আছে: Employees receive 20 annual leave days.
+
+Computer-এর কাছে এটি একটি text/String। কিন্তু computer-কে যদি বলা হয়, এই sentence-এর meaning অন্য sentence-এর সাথে কতটা similar?
+তখন raw text compare করা যথেষ্ট নয়।
+
+যেমন:
+Sentence A:
+Employees receive 20 annual leave days.
+
+Sentence B:
+Workers get 20 vacation days.
+
+শব্দগুলো পুরোপুরি একই নয় annual leave vs vacation, কিন্তু meaning কাছাকাছি।
+
+তাই AI system text-এর semantic meaning-কে একটি numerical representation-এ convert করতে পারে। এটাই embedding।
+
+
+Q : Similarity কী?
+-> এখন দুটি sentence দেখি।
+
+- Sentence 1: Employees receive 20 annual leave days.
+- Sentence 2: Employees get 20 vacation days.
+
+দুটি sentence-এর embedding:
+    Sentence 1
+        ↓
+    [0.12, 0.55, -0.22, 0.81]
+
+    Sentence 2
+       ↓
+    [0.11, 0.52, -0.20, 0.79]
+
+দুটি vector কাছাকাছি। অর্থাৎ:
+
+Semantic similarity
+        ↑
+      বেশি
+
+আবার, Sentence 3 : The office cafeteria serves lunch at noon.
+এর vector: [0.91, -0.34, 0.18, -0.72]
+
+এটি প্রথম vector-এর তুলনায় অনেক আলাদা। তাই:
+Sentence 1 ↔ Sentence 2
+Similarity = High
+
+Sentence 1 ↔ Sentence 3
+Similarity = Low
+
+এই similarity-ই Vector Database-এর মূল শক্তি।
+
+
+Q : Search কীভাবে হয়?
+-> এখন user প্রশ্ন করল: How many annual leaves do employees receive?
+Application প্রথমে এই question-এর embedding তৈরি করবে।
+
+    User Question
+         ↓
+    Embedding Model
+         ↓
+    Question Vector
+
+ধরা যাক: [0.10, 0.54, -0.21, 0.80]
+এখন এই vector-টি Vector Database-এ search করা হবে।
+
+Database-এর ভিতরে আগে থেকে আছে
+
+Chunk A
+"Employees receive 20 annual leave days."
+
+Vector A
+[0.12, 0.55, -0.22, 0.81]
+
+Chunk B
+"Office working hours are 9 AM to 6 PM."
+
+Vector B
+[0.90, -0.30, 0.15, -0.60]
+
+Chunk C
+"Employees can work remotely two days per week."
+
+Vector C
+[0.70, -0.10, 0.30, -0.40]
+
+
+Question vector:
+[0.10, 0.54, -0.21, 0.80]
+
+এখন similarity calculation:
+Question Vector
+       │
+       ├── compare → Vector A → VERY SIMILAR
+       │
+       ├── compare → Vector B → NOT VERY SIMILAR
+       │
+       └── compare → Vector C → NOT VERY SIMILAR
+
+তাই Vector Database বলবে:
+Most relevant: Chunk A
+এবং application পাবে: Employees receive 20 annual leave days.
+
+
+-> এখানে "Search" আসলে Google-এর মতো traditional keyword search হিসেবে ভাবলে confusion হবে। Traditional keyword search:
+
+Question: How many annual leaves?
+
+Search keyword : annual, leave
+
+কিন্তু semantic/vector search meaning-এর similarity ব্যবহার করে। যেমন:
+
+Question:
+How many vacation days do employees get?
+
+Document:
+Employees receive 20 annual leave days.
+
+Exact শব্দ vacation document-এ নেই। কিন্তু semantic meaning কাছাকাছি। তাই embedding-based similarity search relevant document খুঁজে পেতে পারে।
+
+
+Q : Similarity কীভাবে measure করা হয়?
+-> Common similarity/distance measures:
+
+1. Cosine Similarity
+দুটি vector-এর direction কতটা similar সেটা measure করে।
+
+2. Euclidean Distance
+দুটি vector-এর মধ্যে geometric distance measure করে।
+
+3. Dot Product
+দুটি vector-এর relationship measure করতে ব্যবহৃত হয়।
+
+কোন metric ব্যবহার হবে তা embedding model এবং vector database/index configuration-এর উপর নির্ভর করে।
+
+RAG এর জন্য সবচেয়ে common term: Cosine similarity
+
+
+-> Relational Database Vs Vector Database
+
+- Relational Database
+মূলত structured relational data এবং exact/filter-based queries-এর জন্য।
+
+- Vector Database
+মূলত vector representations-এর similarity search-এর জন্য।
+
+তবে modern systems দুই ধরনের capability একসাথে ব্যবহার করতে পারে।
+
+
+
+-> Example of Vector Database:
+- Pinecone
+- Weaviate
+- Qdrant
+- Chroma
+
+FAISS is technically a vector search library and pgvector is a database extension

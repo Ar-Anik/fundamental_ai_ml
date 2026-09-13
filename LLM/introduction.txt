@@ -1,0 +1,59 @@
+Q : LLM কী?
+-> LLM = Large Language Model
+
+সহজভাবে, LLM হলো এমন একটি AI model যা মানুষের ভাষার text বুঝে এবং input অনুযায়ী নতুন text generate করে। উদাহরণ:
+- GPT
+- Claude
+- Gemini
+
+ধরা যাক একটি application-এ এই প্রশ্ন এসেছে: What is REST API?
+
+Application প্রশ্নটি LLM-এর কাছে পাঠাল।
+
+    User Question
+         ↓
+         LLM
+         ↓
+    Generated Answer
+
+LLM উত্তর তৈরি করবে, যেমন:
+A REST API is an API architecture style that uses HTTP methods to interact with resources.
+
+এখানে LLM-এর কাজ হলো:
+Input text → understand context → generate output text
+
+
+ধরা যাক একটি company-এর নিজস্ব policy আছে: Annual Leave Policy
+            Every employee receives 20 annual leave days per year.
+
+এই information company-এর internal document-এ আছে। এখন প্রশ্ন: How many annual leave days do employees receive?
+
+Q : এখানে কি LLM automatically জানবে যে company-তে 20 days annual leave আছে?
+-> না।
+
+
+LLM-এর training-এর সময় অনেক ধরনের public information শেখানো হয়েছে। কিন্তু কোনো application-এর private/internal data automatically LLM-এর
+knowledge-এর অংশ হয়ে যায় না।
+
+
+# একটি বাস্তব উদাহরণ
+ধরা যাক একটি HR company-এর database আছে:
+
+Employee
+---------
+id
+name
+department
+leave_balance
+salary
+
+Database-এ:
+id = 101
+name = Rahim
+leave_balance = 18
+
+এখন user প্রশ্ন করল: How many leaves does employee 101 have?
+
+LLM-এর কাছে শুধু: How many leaves does employee 101 have? পাঠালে LLM database-এর এই information দেখতে পাচ্ছে না। কারণ: LLM এবং Company Database দুটি আলাদা system।
+
+LLM-কে external data access করার ব্যবস্থা application-কে তৈরি করে দিতে হয়।

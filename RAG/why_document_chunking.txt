@@ -1,0 +1,39 @@
+Suppose, একটি বড় document 100 pages এখন পুরো document প্রতিটি user question-এর সময় LLM-এ পাঠানো efficient নয়।
+Problem Create :
+- বেশি token
+- বেশি cost
+- বেশি latency
+- context irrelevant হয়
+- context window limitation থাকে
+
+তাই document:
+  Large Document
+      ↓
+    Chunking
+      ↓
+    Chunk 1
+    Chunk 2
+    Chunk 3
+    Chunk 4
+
+প্রতিটি chunk:
+    Chunk
+       ↓
+    Embedding
+       ↓
+    Vector Database
+
+User question এলে:
+    Question
+       ↓
+    Embedding
+       ↓
+    Similarity Search
+       ↓
+    Top K Relevant Chunks
+       ↓
+    LLM Context
+
+উদাহরণ: Top 3 chunks retrieve করা হলো।
+
+তারপর, Context = Chunk1 + Chunk2 + Chunk3 এটি LLM-কে দেওয়া হলো।

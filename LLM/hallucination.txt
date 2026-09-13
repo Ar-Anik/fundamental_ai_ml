@@ -1,0 +1,23 @@
+Q : Hallucination কী?
+-> LLM সাধারণত received input/context এবং learned patterns-এর ভিত্তিতে response generate করে। কিন্তু LLM সবসময়:
+                "আমি এই information জানি না"
+এভাবে থেমে যায় না। কখনো এমন information generate করতে পারে যা বাস্তব data-এর সাথে মেলে না। এটাকে সাধারণভাবে, Hallucination বলা হয়।
+
+
+ধরা যাক company policy: Annual Leave = 20 days কিন্তু LLM-কে company policy দেওয়া হলো না।
+
+Question করা হলো: How many annual leave days does our company provide?
+
+LLM-এর কাছে actual company policy নেই। তবুও model একটি answer generate করতে পারে, যেমন:
+                Your company provides 25 annual leave days.
+
+কিন্তু actual policy: 20 days অর্থাৎ generated answer বাস্তব company data-এর সাথে match করছে না। এটাই hallucination-এর example।
+
+
+-> LLM মূলত একটি language model। LLM-এর মূল কাজ: Given the input/context, generate an appropriate continuation/response.
+
+এটি database query engine নয়। অর্থাৎ LLM নিজে automatically: SELECT leave_days FROM company_policy; execute করছে না।
+
+যদি database/tool/document access explicitly application-এর মাধ্যমে দেওয়া না থাকে, তাহলে model-এর কাছে সেই live/private information থাকবে না।
+
+

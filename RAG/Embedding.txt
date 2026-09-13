@@ -1,0 +1,48 @@
+Computer-এর জন্য text-এর meaning সরাসরি compare করা সহজ নয়।
+
+ধরা যাক user লিখল: How many vacation days do employees get?
+
+Document-এ লেখা: Employees receive 20 annual leave days per year.
+
+দুটি sentence-এর exact words একই নয়। কিন্তু meaning কাছাকাছি। তাই শুধু exact keyword search সবসময় যথেষ্ট নয়।
+
+Embedding model text-কে mathematical vector representation-এ convert করে।
+Embedding হলো text-এর meaning-কে numbers/vector-এ represent করার পদ্ধতি, যাতে similarity ব্যবহার করে similar বা relevant text খুঁজে বের করা যায়।
+
+Conceptually:
+
+"Employees receive 20 annual leave days."
+                 ↓
+            Embedding Model
+                 ↓
+        [0.12, -0.42, 0.87, ...]
+
+আর:
+
+"How many vacation days do employees get?"
+                 ↓
+            Embedding Model
+                 ↓
+        [0.10, -0.40, 0.85, ...]
+
+Vector representations কাছাকাছি হলে semantic similarity বেশি হওয়ার ইঙ্গিত পাওয়া যায়। তাই application বুঝতে পারে:
+                annual leave
+                    ≈
+                vacation days
+
+
+-> Keyword Search vs Vector Search
+
+ধরা যাক document: Employees receive 20 annual leave days.
+
+User লিখল: How many vacation days do I have?
+
+Keyword search-এ: vacation শব্দটি document-এ নেই।
+
+কিন্তু vector search semantic meaning consider করে:
+        vacation days
+             ≈
+        annual leave
+
+তাই relevant document পাওয়া যায়। এটি Vector Database ব্যবহারের বড় কারণ।
+

@@ -1,0 +1,108 @@
+RAG = Retrieval-Augmented Generation
+
+নামটা তিন ভাগে ভাঙলে খুব সহজ হয়:
+
+    Retrieval
+       +
+    Augmented
+       +
+    Generation
+
+
+1. Retrieval
+Retrieval = relevant information খুঁজে বের করা।
+
+ধরা যাক company-এর 100টি document আছে:
+
+Document 1 → Leave Policy
+Document 2 → Attendance Policy
+Document 3 → Salary Policy
+Document 4 → Holiday Policy
+Document 5 → Remote Work Policy
+...
+Document 100
+
+User প্রশ্ন করল: How many annual leaves are available?
+
+Application-এর কাজ হলো: এই 100টি document-এর মধ্যে কোন information এই question-এর জন্য relevant? খুঁজে বের করা
+
+ধরা যাক: Document 1 → Leave Policy এখানে relevant information পাওয়া গেল। এটাই, Retrieval
+
+
+2. Augmented
+এখন retrieved information LLM-এর input-এর সাথে যোগ করা হবে। ধরা যাক retrieval থেকে পাওয়া গেল:
+        Employees receive 20 annual leave days per year.
+
+এখন application এটি LLM-এর context-এ add করবে।
+
+Question:
+How many annual leaves are available?
+
+Context:
+Employees receive 20 annual leave days per year.
+
+অর্থাৎ LLM-এর original input-এর সাথে additional relevant information যোগ করা হলো। এটাই Augmented
+
+
+3. Generation
+এখন LLM context দেখে final answer generate করবে: Employees receive 20 annual leave days per year.
+এটাই Generation
+
+
+পুরো RAG একসাথে
+    User Question
+          ↓
+    Retrieve Relevant Information
+          ↓
+    Add Retrieved Information as Context
+          ↓
+    Send Context + Question to LLM
+          ↓
+    LLM Generates Answer
+
+এটাই RAG-এর basic flow।
+
+
+ধরা যাক একটি company-এর documents:
+- leave_policy.txt
+- attendance_policy.txt
+- remote_work_policy.txt
+- salary_policy.txt
+- holiday_policy.txt
+
+User Question: How many annual leaves are available?
+
+Application:
+Step 1 — Question গ্রহণ
+How many annual leaves are available?
+
+Step 2 — Relevant information search
+System খুঁজবে: leave_policy.txt
+
+Step 3 — Relevant content retrieve
+Employees receive 20 annual leave days per year.
+
+Step 4 — LLM-এর context তৈরি
+Context:
+Employees receive 20 annual leave days per year.
+
+Question:
+How many annual leaves are available?
+
+Step 5 — LLM
+Employees receive 20 annual leave days per year.
+
+
+-> RAG প্রথমে external knowledge source থেকে relevant information retrieve করে, তারপর সেই information LLM-এর context হিসেবে ব্যবহার করে answer generate করে।
+
+
+-> Application কীভাবে বুঝবে কোন document relevant? ধরা যাক 1000টি document আছে:
+document_001
+document_002
+document_003
+...
+document_1000
+
+Question: How many annual leaves do employees receive?
+
+Application কীভাবে বুঝবে: document_782 সবচেয়ে relevant? এখানে আসে Embedding

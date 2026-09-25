@@ -1,0 +1,139 @@
+Q : Tool Calling কী?
+-> Tool Calling হলো এমন একটি mechanism যেখানে LLM নিজে কোনো external function/API execute না করে, প্রয়োজন অনুযায়ী একটি নির্দিষ্ট tool ব্যবহার করার request
+তৈরি করে, আর application সেই request অনুযায়ী tool execute করে এবং result আবার LLM-কে দেয়।
+
+সহজভাবে, LLM সিদ্ধান্ত নেয় কোন tool দরকার এবং কী arguments লাগবে; application সেই tool execute করে।
+
+1. সাধারণ LLM Vs Tool Calling
+
+- সাধারণ LLM
+     User
+      ↓
+     LLM
+      ↓
+    Text Response
+
+LLM-এর কাছে যদি current order status-এর তথ্য না থাকে, সে নিজে database থেকে সেটা retrieve করতে পারে না।
+
+- Tool Calling
+    User
+      ↓
+    LLM
+      ↓
+    Tool Call Request
+      ↓
+    Application
+      ↓
+    Tool Execution
+      ↓
+    Tool Result
+      ↓
+     LLM
+      ↓
+    Final Response
+
+এখানে LLM এবং tool-এর মধ্যে application runtime-এ একটি bridge হিসেবে কাজ করে।
+
+
+
+-> ধরা যাক application-এ একটি tool আছে:
+
+def get_order_status(order_id: str):
+    ...
+
+এর কাজ:
+    order_id
+       ↓
+    Database / Order Service
+       ↓
+    Current Order Status
+
+Tool-এর description(that provide to llm) : Get the current status of an order using an order ID.
+
+User input : Check order 12345.
+
+
+3. Step-by-step Execution Flow :
+
+Step 1 — Application LLM-কে tool definition দেয়
+
+LLM-কে বলা হয়:
+Available tool: get_order_status
+Description: Get the current status of an order using an order ID.
+Argument: order_id: string
+
+এখানে LLM function-এর Python implementation পায় না। সাধারণত tool-এর name, description, input schema ইত্যাদি পায়।
+
+
+Step 2 — User প্রশ্ন করে
+-> Check order 12345.
+
+LLM বুঝতে পারে: এই প্রশ্নের উত্তর দিতে order status জানা প্রয়োজন।
+
+তাই সাধারণ text answer না দিয়ে একটি structured tool call request তৈরি করে।
+
+Conceptually:
+{
+  "tool": "get_order_status",
+  "arguments": {
+    "order_id": "12345"
+  }
+}
+
+এটি খুব গুরুত্বপূর্ণ: LLM এখানে function execute করছে না।
+
+LLM শুধু বলছে: get_order_status tool-টি order_id="12345" দিয়ে call করা দরকার।
+
+
+Step 3 — Application tool execute করে
+Application runtime-এ LLM-এর tool-call request receive করে। তারপর application নিজের code-এর মাধ্যমে execute করে:
+        get_order_status("12345")
+
+ধরা যাক result:
+{
+    "order_id": "12345",
+    "status": "shipped"
+}
+
+
+Step 4 — Result আবার LLM-কে দেওয়া হয়
+
+Application tool result-টি আবার LLM-এর conversation context-এ পাঠায়।
+
+Conceptually:
+
+Tool: get_order_status
+Result:
+{
+    "order_id": "12345",
+    "status": "shipped"
+}
+
+LLM এখন এই result দেখে final natural-language response তৈরি করে।
+
+যেমন: Order 12345 has been shipped.
+
+
+Responsibilities of LLM
+- user intent বুঝে
+- কোন tool প্রয়োজন তা নির্বাচন করে
+- tool-এর required arguments তৈরি করে
+- tool result দেখে final response তৈরি করে
+
+
+Responsibilities of Application
+- allowed tools register/define করে
+- LLM-এর tool-call request গ্রহণ করে
+- arguments validate করে
+- actual function/API execute করে
+- tool result LLM-কে ফেরত দেয়
+- authorization, permissions, error handling ইত্যাদি enforce করে
+
+Responsibilities of Tool
+- actual কাজটি করে যেমন:
+Database query
+API request
+File search
+Calculator
+Weather service
+Payment service

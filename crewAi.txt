@@ -1,0 +1,329 @@
+CrewAI কী?
+
+CrewAI হলো Python-based একটি framework, যা একাধিক specialized AI agent-কে একসাথে কাজ করিয়ে multi-agent application/workflow তৈরি করতে ব্যবহৃত হয়।
+
+মূল idea হলো:
+
+একটি complex task-কে একাধিক specialized role-এ ভাগ করে, প্রতিটি role-এর জন্য আলাদা AI agent নির্ধারণ করা এবং তাদের কাজকে একটি coordinated workflow হিসেবে পরিচালনা করা।
+
+1. প্রথমে বুঝতে হবে — Agent কী?
+
+CrewAI বোঝার আগে AI Agent concept পরিষ্কার থাকা দরকার।
+
+সাধারণ LLM application:
+
+User
+  ↓
+LLM
+  ↓
+Answer
+
+এখানে LLM মূলত input নিয়ে response generate করছে।
+
+কিন্তু Agent-based application-এ system-এর একটি নির্দিষ্ট goal থাকে এবং প্রয়োজন অনুযায়ী available tools ব্যবহার করে কাজ সম্পন্ন করতে পারে।
+
+User
+  ↓
+Agent
+  ↓
+Decide what action is needed
+  ↓
+Use Tool
+  ↓
+Get Result
+  ↓
+Continue
+  ↓
+Final Answer
+
+অর্থাৎ Agent-এর মূল ধারণা:
+
+Goal + LLM + Tools + Actions + Result handling
+
+2. তাহলে Multi-Agent কী?
+
+একটি Agent-এর কাছে যদি অনেক ধরনের কাজ দেওয়া হয়, তাহলে একই Agent-কে research, analysis, writing—সবকিছু করতে হয়।
+
+ধরা যাক:
+
+Research AI trends and prepare a detailed report.
+
+একটি Agent:
+
+Agent
+ ├── Research
+ ├── Analyze
+ └── Write Report
+
+Multi-agent approach-এ কাজটি ভাগ করা যায়:
+
+Research Agent
+      ↓
+Research information
+
+Analysis Agent
+      ↓
+Analyze research
+
+Writer Agent
+      ↓
+Prepare report
+
+এখানে প্রতিটি Agent-এর আলাদা responsibility আছে।
+
+3. CrewAI এখানে কী করে?
+
+CrewAI এই multiple agents-কে define এবং coordinate করার জন্য framework দেয়।
+
+Conceptually:
+
+                    Crew
+                     │
+        ┌────────────┼────────────┐
+        ↓            ↓            ↓
+   Research       Analysis      Writer
+     Agent          Agent        Agent
+        │            │            │
+        └────────────┼────────────┘
+                     ↓
+                Final Output
+
+CrewAI মূলত তিনটি গুরুত্বপূর্ণ concept-এর মাধ্যমে এই workflow organize করে:
+
+Agent
+Task
+Crew
+
+এগুলো interview-এর জন্য খুব গুরুত্বপূর্ণ।
+
+4. Agent কী?
+
+CrewAI-তে Agent হলো একটি specialized AI worker।
+
+একটি Agent-এর সাধারণ characteristics:
+
+Role
+Goal
+Backstory
+LLM
+Tools
+Tasks
+
+উদাহরণ:
+
+researcher = Agent(
+    role="Researcher",
+    goal="Find accurate information about AI trends",
+    backstory="An experienced technology researcher",
+)
+
+এখানে Agent-কে বলা হচ্ছে:
+
+Role: Researcher
+
+Goal: AI trends সম্পর্কে information খুঁজে বের করা
+
+Backstory: Technology research-এ experienced
+
+Backstory-এর উদ্দেশ্য হলো Agent-এর behavior/context define করা। এটি কোনো real human identity নয়।
+
+5. Task কী?
+
+Task হলো Agent-কে দেওয়া নির্দিষ্ট কাজ।
+
+যেমন:
+
+research_task = Task(
+    description="Research the latest AI trends",
+    expected_output="A structured summary of important AI trends"
+)
+
+অর্থাৎ:
+
+Agent
+  ↓
+Task
+  ↓
+Specific work
+
+একটি Agent-এর capability এবং একটি Task-এর responsibility একই বিষয় নয়।
+
+সহজভাবে:
+
+Agent = কে কাজ করবে?
+
+Task = কী কাজ করবে?
+
+6. Crew কী?
+
+Crew হলো একাধিক Agent এবং তাদের Tasks-কে একটি coordinated unit হিসেবে পরিচালনা করার structure।
+
+Conceptually:
+
+crew = Crew(
+    agents=[researcher, analyst, writer],
+    tasks=[research_task, analysis_task, writing_task]
+)
+
+তারপর workflow execute করা যায়।
+
+result = crew.kickoff()
+
+অর্থাৎ:
+
+Agents
+   +
+Tasks
+   ↓
+Crew
+   ↓
+Execute Workflow
+   ↓
+Result
+7. Complete Example
+
+ধরা যাক requirement:
+
+"Research Generative AI and prepare a report."
+
+আমরা তিনটি Agent তৈরি করলাম।
+
+Research Agent
+Role:
+Researcher
+
+Goal:
+Find relevant information
+
+Task:
+Research Generative AI
+Analysis Agent
+Role:
+Analyst
+
+Goal:
+Analyze research findings
+
+Task:
+Analyze the collected information
+Writer Agent
+Role:
+Technical Writer
+
+Goal:
+Create a clear report
+
+Task:
+Write the final report
+
+Workflow:
+
+User Request
+     ↓
+Research Agent
+     ↓
+Research Result
+     ↓
+Analysis Agent
+     ↓
+Analysis Result
+     ↓
+Writer Agent
+     ↓
+Final Report
+
+এখানে গুরুত্বপূর্ণ বিষয় হলো এক Agent-এর output পরবর্তী Agent-এর input/context হিসেবে ব্যবহার করা যেতে পারে।
+
+8. CrewAI কেন ব্যবহার করা হয়?
+
+Complex AI application-এ একটি Agent-এর responsibility অনেক বড় হয়ে যেতে পারে।
+
+যেমন একটি system-এ:
+
+Research
+Data Collection
+Data Analysis
+Fact Checking
+Report Writing
+
+সব responsibility একটি Agent-কে দিলে workflow-এর structure এবং responsibility আলাদা করে manage করা কঠিন হতে পারে।
+
+Multi-agent design-এ:
+
+Research Agent
+        ↓
+Analysis Agent
+        ↓
+Fact Checker
+        ↓
+Writer Agent
+
+প্রতিটি Agent-এর একটি focused responsibility থাকে।
+
+এতে application-এর workflow আরও explicitly organize করা যায়।
+
+তবে multi-agent সবসময় প্রয়োজনীয় নয়।
+
+Simple Q&A application-এর জন্য:
+
+User → LLM → Answer
+
+যথেষ্ট হতে পারে।
+
+Multi-agent architecture তখন useful যখন task-এর মধ্যে multiple distinct responsibilities বা specialized workflows থাকে।
+
+9. Sequential Workflow কী?
+
+একটি common workflow হলো sequential execution।
+
+অর্থাৎ Task একটার পর একটা execute হবে।
+
+Task 1
+  ↓
+Task 2
+  ↓
+Task 3
+
+আমাদের example:
+
+Research
+   ↓
+Analysis
+   ↓
+Writing
+
+Research Agent আগে কাজ করবে।
+
+তার output Analysis Agent-এর কাজের context হিসেবে যাবে।
+
+তারপর Analysis-এর result Writer Agent ব্যবহার করবে।
+
+এটি বুঝতে interview-এ এই statement গুরুত্বপূর্ণ:
+
+In a sequential multi-agent workflow, tasks are executed in a defined order, and the output/context from an earlier task can be passed to subsequent tasks.
+
+10. Parallel কাজও হতে পারে
+
+সব workflow sequential হতে হবে এমন নয়।
+
+ধরা যাক তিনটি independent research দরকার:
+
+             ┌→ Web Research
+             │
+User Request ├→ Market Research
+             │
+             └→ Technical Research
+                    ↓
+              Report Writer
+
+এখানে independent research tasks parallelভাবে execute করার design করা যেতে পারে, তারপর তাদের results combine করে final Agent report তৈরি করতে পারে।
+
+তাই multi-agent architecture-এর মূল বিষয় শুধু:
+
+Agent A → Agent B → Agent C
+
+নয়।
+
+মূল বিষয় হলো:
+
+Multiple specialized agents-এর কাজকে একটি coordinated workflow হিসেবে orchestrate করা।

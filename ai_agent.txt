@@ -1,0 +1,130 @@
+Q : AI Agent কী?
+-> AI Agent হলো এমন একটি AI system, যেখানে একটি LLM শুধু answer generate করে না; বরং available tools/actions ব্যবহার করে কোনো task সম্পন্ন করার জন্য পরবর্তী
+পদক্ষেপ নির্বাচন করতে পারে। সহজভাবে:
+
+LLM = Think/Generate
+Agent = Decide → Act → Observe → Continue → Answer
+
+একটি Agent সাধারণত LLM-কে decision-making component হিসেবে ব্যবহার করে।
+
+
+-> Normal LLM :
+ধরা যাক, User Question :
+
+ What is the current weather in Dhaka?
+        ↓
+       LLM
+        ↓
+     Answer
+
+LLM-এর কাছে যদি current weather data বা weather tool না থাকে, তাহলে সে real-time weather জানতে পারবে না। কারণ LLM-এর মূল কাজ হলো তার input/context-এর
+ভিত্তিতে response generate করা।
+
+
+-> AI Agent :
+Agent-এর কাছে বিভিন্ন tools থাকতে পারে:
+weather_tool()
+calculator()
+database_tool()
+search_tool()
+email_tool()
+
+তখন:
+    User Request
+         ↓
+       Agent
+         ↓
+    LLM decides what is needed
+         ↓
+    Selects a Tool
+         ↓
+    Tool Executes
+         ↓
+    Tool Result
+         ↓
+    Agent/LLM uses the result
+         ↓
+    Final Answer
+
+উদাহরণ:
+
+User question : What is the current weather in Dhaka?
+                ↓
+              Agent
+                ↓
+LLM determines: "I need current weather data."
+                ↓
+         weather_tool("Dhaka")
+                ↓
+       Tool returns:32°C, Sunny
+                ↓
+               LLM
+                ↓
+ "The current weather in Dhaka is 32°C and sunny."
+
+এখানে গুরুত্বপূর্ণ বিষয় হলো LLM নিজে weather API নয়। LLM সিদ্ধান্ত নিতে সাহায্য করেছে যে weather tool ব্যবহার করা প্রয়োজন। Tool actual external data সংগ্রহ করেছে।
+
+
+
+Q : why the name "Agent"?
+-> কারণ Agent শুধু একটি response generate করার মধ্যে সীমাবদ্ধ নয়। একটি Agent:
+- Understand — user-এর task বুঝে
+- Decide — কী action/tool দরকার তা নির্ধারণ করে
+- Act — tool/action execute করে
+- Observe — tool-এর result দেখে
+- Continue or Finish — প্রয়োজন হলে আবার action নেয়
+- Respond — final result দেয়
+
+উদাহরণ:
+
+"Find the weather in Dhaka
+and tell me whether I need an umbrella."
+          ↓
+        Agent
+          ↓
+    Weather Tool
+          ↓
+      Rain: Yes
+          ↓
+         LLM
+          ↓
+"Yes, you may need an umbrella."
+
+এখানে Agent একটি multi-step task সম্পন্ন করেছে।
+
+
+
+-> LLM Vs AI Agent
+- LLM
+
+    Input
+      ↓
+    LLM
+      ↓
+    Output
+
+Core responsibilities : Generate or reason over a response from the information available to it.
+
+- Agent
+
+    User Task
+        ↓
+      Agent
+        ↓
+    Decide what to do
+        ↓
+    Use Tool / Action
+        ↓
+    Observe Result
+        ↓
+    Decide next step if needed
+        ↓
+    Final Answer
+
+Core responsibilities : Use an LLM within a system that can select and invoke tools/actions to accomplish a task.
+
+
+-> Agent মানেই necessarily "LLM thinks step-by-step internally" নয়। Agent-এর মূল বৈশিষ্ট্য হলো:
+    The system can dynamically choose and execute actions/tools based on the task and available information.
+অর্থাৎ শুধু এই কারণে কোনো application Agent হয়ে যায় না যে সেখানে LLM আছে।
+

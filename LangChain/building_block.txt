@@ -1,0 +1,171 @@
+একটি LLM application-এর context-এ কয়েকটি গুরুত্বপূর্ণ building block বোঝা দরকার।
+
+1. Model
+Model হলো text generation বা reasoning-এর মূল component। উদাহরণ:
+
+    User Question
+          ↓
+         LLM
+          ↓
+    Generated Response
+
+LangChain নিজে model নয়। বরং LangChain বিভিন্ন model provider-এর model-কে application workflow-এর মধ্যে ব্যবহার করার abstraction/integration দেয়।
+
+Conceptually:
+
+LangChain
+    │
+    ├── Model integration
+    │
+    ├── Prompt
+    │
+    ├── Retriever
+    │
+    ├── Tools
+    │
+    └── Output handling
+
+2. Prompt
+Prompt হলো model-কে দেওয়া instruction/input structure। উদাহরণ:
+
+You are an HR assistant.
+
+Use the provided company policy to answer the question.
+
+Context:
+{context}
+
+Question:
+{question}
+
+এখানে:
+context
+question
+
+runtime-এ dynamically বসানো হতে পারে। LangChain prompt abstraction ব্যবহার করে এই ধরনের prompt template তৈরি এবং reuse করা যায়।
+
+Conceptually:
+
+    Question
+       +
+    Context
+       ↓
+    Prompt Template
+       ↓
+    Final Prompt
+       ↓
+    LLM
+
+এটি বিশেষভাবে useful যখন একই prompt structure বারবার ব্যবহার করতে হয়।
+
+
+3. Retriever
+Retriever-এর কাজ হলো, একটি query-এর জন্য relevant information retrieve করা। RAG application-এ এটি অত্যন্ত গুরুত্বপূর্ণ।
+
+উদাহরণ:
+User: "What is the company's leave policy?"
+
+Retriever relevant document chunks খুঁজে বের করে।
+
+    Question
+       ↓
+    Retriever
+       ↓
+    Relevant document chunks
+
+Retriever সাধারণত কোনো data source-এর সঙ্গে কাজ করে।
+
+যেমন:
+Vector store
+Search index
+Database
+Other retrieval systems
+
+তাই Retriever নিজে LLM নয়। Retriever-এর কাজ হলো relevant information খুঁজে আনা।
+
+
+4. Vector Store
+Vector store হলো এমন storage/search system যেখানে embeddings ব্যবহার করে similarity-based retrieval করা যায়।
+
+RAG-এর context-এ flow:
+
+    Documents
+        ↓
+    Chunking
+        ↓
+    Embeddings
+        ↓
+    Vector Store
+
+তারপর user প্রশ্ন:
+
+    Question
+        ↓
+    Question Embedding
+        ↓
+    Similarity Search
+        ↓
+    Relevant Chunks
+
+
+Vector Store মূলত embeddings এবং associated data store/search করার infrastructure।
+
+Conceptually:
+
+                Vector Store
+                    ↑
+                    │
+               Retriever
+                    ↑
+                    │
+                Query
+
+
+5. Tools
+Tool হলো application-এর এমন capability যা model/workflow প্রয়োজন অনুযায়ী invoke করতে পারে।
+
+উদাহরণ:
+Weather Tool
+Database Query Tool
+Calculator Tool
+Search Tool
+Internal API Tool
+
+ধরা যাক user বলল: "What is the current weather in Dhaka?"
+LLM-এর নিজের training knowledge দিয়ে current weather নিশ্চিত করা যাবে না। একটি weather API tool ব্যবহার করা যেতে পারে:
+
+    User Question
+          ↓
+    LLM / Agent
+          ↓
+    Weather Tool
+          ↓
+    Weather API
+          ↓
+    Result
+          ↓
+    LLM
+          ↓
+    Final Answer
+
+এখানে গুরুত্বপূর্ণ বিষয়: Tool হলো external capability। LLM tool-এর result ব্যবহার করে final response তৈরি করতে পারে।
+
+
+6. Output Parser
+LLM-এর output সবসময় application-এর প্রয়োজনীয় structured format-এ নাও থাকতে পারে। ধরা যাক application চায়:
+
+{
+    "name": "Anik",
+    "department": "Engineering"
+}
+
+কিন্তু model একটি সাধারণ text response দিতে পারে। Output handling/structured-output mechanisms ব্যবহার করে model output application-এর expected
+structure-এর সঙ্গে align করা যায়। Conceptually:
+
+    LLM Response
+         ↓
+    Output Parser / Structured Output Handling
+         ↓
+    Application-friendly Output
+
+এটি API/application integration-এর ক্ষেত্রে গুরুত্বপূর্ণ।

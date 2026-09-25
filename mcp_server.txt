@@ -1,0 +1,511 @@
+1. MCP কী?
+
+MCP = Model Context Protocol
+
+MCP হলো একটি open protocol যা AI applications-কে external tools, data, and services-এর সাথে standardized way-তে connect করার জন্য তৈরি করা হয়েছে।
+
+সহজ ভাষায়:
+
+MCP একটি standard communication protocol, যার মাধ্যমে একটি AI application external capabilities discover এবং use করতে পারে।
+
+এখানে সবচেয়ে গুরুত্বপূর্ণ শব্দ হলো standardized।
+
+2. MCP কেন দরকার?
+
+প্রথমে MCP ছাড়া একটি AI application চিন্তা করা যাক।
+
+ধরা যাক একটি AI assistant-এর নিচের capabilities দরকার:
+
+GitHub
+Database
+File System
+Internal API
+Slack
+CRM
+
+প্রতিটি system-এর জন্য application-এর ভিতরে আলাদা integration logic লেখা যেতে পারে।
+
+যেমন:
+
+AI Application
+   │
+   ├── Custom GitHub Integration
+   │
+   ├── Custom Database Integration
+   │
+   ├── Custom File Integration
+   │
+   ├── Custom API Integration
+   │
+   └── Custom Slack Integration
+
+এতে সমস্যা হলো প্রতিটি integration-এর জন্য আলাদা interface, authentication handling, request/response structure এবং integration code maintain করতে হয়।
+
+MCP এই integration problem-এর জন্য একটি common protocol দেয়।
+
+3. MCP কী problem solve করে?
+
+মূল problem:
+
+AI applications কীভাবে বিভিন্ন external system-এর capabilities-এর সাথে consistent এবং standardized way-তে communicate করবে?
+
+MCP এই communication-এর জন্য common rules define করে।
+
+Conceptually:
+
+Without MCP
+
+AI Application
+ ├── Custom → GitHub
+ ├── Custom → Database
+ ├── Custom → Files
+ └── Custom → Internal API
+
+
+With MCP
+
+AI Application
+       │
+       │ MCP
+       ↓
+ MCP Server
+       │
+       └── External System
+
+অর্থাৎ AI application-কে প্রতিটি external system-এর integration mechanism আলাদাভাবে জানার পরিবর্তে MCP-compatible server-এর মাধ্যমে standardized interface পাওয়া যায়।
+
+4. MCP-এর মূল architecture
+
+একটি simplified MCP architecture:
+
+                    AI Application
+                         │
+                    MCP Client
+                         │
+                    MCP Protocol
+                         │
+                         ↓
+                    MCP Server
+                   /     |      \
+                  /      |       \
+                 ↓       ↓        ↓
+              Tools   Resources  Prompts
+                │         │         │
+                ↓         ↓         ↓
+             Actions     Data    Templates
+
+এখন প্রতিটি অংশ কী করে সেটা বোঝা গুরুত্বপূর্ণ।
+
+AI Application
+
+এটি হলো মূল application যেখানে AI/LLM ব্যবহার করা হচ্ছে।
+
+উদাহরণ:
+
+AI Assistant
+Coding Assistant
+Enterprise AI Application
+MCP Client
+
+MCP Client হলো AI application-এর সেই component যা MCP server-এর সাথে MCP protocol ব্যবহার করে communication করে।
+
+অর্থাৎ:
+
+AI Application
+      │
+      ↓
+MCP Client
+      │
+      ↓
+MCP Server
+
+MCP Client server-এর capabilities discover করতে এবং সেগুলো ব্যবহার করতে পারে।
+
+MCP Server
+
+MCP Server external capabilities-গুলোকে MCP-compatible interface হিসেবে expose করে।
+
+উদাহরণ:
+
+MCP Server
+    │
+    ├── get_customer()
+    ├── get_order()
+    ├── search_products()
+    └── customer_database
+
+Server-এর ভিতরে actual implementation থাকতে পারে:
+
+get_customer()
+      ↓
+Database Query
+      ↓
+Customer Data
+
+অর্থাৎ MCP Server নিজে necessarily database নয়। এটি database বা অন্য external system-এর capability-কে MCP interface-এর মাধ্যমে expose করতে পারে।
+
+5. Tools কী?
+
+MCP-এর একটি গুরুত্বপূর্ণ concept হলো Tools।
+
+Tool হলো এমন একটি capability যা AI application invoke করতে পারে এবং যার মাধ্যমে কোনো action বা computation করা যায়।
+
+উদাহরণ:
+
+get_order(order_id)
+create_ticket(title, description)
+search_products(query)
+send_email(to, subject, body)
+
+ধরা যাক:
+
+def get_order(order_id: str):
+    ...
+
+MCP server এই capability-কে একটি tool হিসেবে expose করতে পারে।
+
+LLM-এর কাছে conceptually tool information থাকতে পারে:
+
+Tool:
+    name: get_order
+
+Description:
+    Get order information using an order ID.
+
+Input:
+    order_id: string
+
+তারপর user বলল:
+
+Check order 12345.
+
+AI application বুঝতে পারে get_order tool relevant।
+
+তারপর MCP Client MCP Server-এর কাছে tool invocation request পাঠায়।
+
+User
+ ↓
+AI Application
+ ↓
+LLM
+ ↓
+Select get_order
+ ↓
+MCP Client
+ ↓
+MCP Server
+ ↓
+get_order("12345")
+ ↓
+Database/API
+ ↓
+Result
+ ↓
+LLM
+ ↓
+Final Answer
+6. Resources কী?
+
+Resource হলো MCP-এর মাধ্যমে AI application-এর কাছে available করা data/context।
+
+Tool এবং Resource-এর মধ্যে একটি গুরুত্বপূর্ণ conceptual difference আছে।
+
+Tool
+
+Tool সাধারণত কোনো action করার capability।
+
+create_ticket()
+send_message()
+get_weather()
+search_database()
+Resource
+
+Resource মূলত information/data access করার একটি standardized way।
+
+উদাহরণ:
+
+file://company/policy.txt
+database://customers/12345
+
+Conceptually:
+
+Tool
+ ↓
+"কিছু কাজ করো"
+
+Resource
+ ↓
+"এই data/context access করো"
+
+তবে exact implementation MCP server-এর design-এর উপর নির্ভর করে।
+
+7. Prompts কী?
+
+MCP Prompts-ও support করে।
+
+Prompt হলো reusable prompt template বা interaction pattern যা MCP server expose করতে পারে।
+
+উদাহরণ:
+
+Prompt:
+    summarize_document
+
+Arguments:
+    document
+
+এর উদ্দেশ্য হলো application-এর জন্য reusable prompt structure provide করা।
+
+তাই MCP-এর major primitives হিসেবে interview-এ মনে রাখা যায়:
+
+Tools
+    → Actions
+
+Resources
+    → Data / Context
+
+Prompts
+    → Reusable interaction templates
+8. MCP Server কি LLM?
+
+না।
+
+এটি খুব important।
+
+LLM
+    ≠
+MCP Server
+
+MCP Server হলো external capabilities expose করার একটি server-side component।
+
+একটি architecture হতে পারে:
+
+                LLM
+                 ↑
+                 │
+          AI Application
+                 │
+             MCP Client
+                 │
+          MCP Protocol
+                 │
+                 ↓
+             MCP Server
+              /      \
+             ↓        ↓
+         Database    API
+
+এখানে:
+
+LLM সিদ্ধান্ত নিতে সাহায্য করে কোন capability ব্যবহার করা দরকার।
+MCP Client MCP communication handle করে।
+MCP Server tools/resources/prompts expose করে।
+External system actual data বা operation provide করে।
+9. MCP Server কি শুধু একটি server?
+
+Conceptually হ্যাঁ, MCP Server হলো MCP protocol implement করা একটি server-side program।
+
+কিন্তু এটি অবশ্যই remote cloud server হতে হবে—এমন নয়।
+
+MCP server local machine-এও run করতে পারে।
+
+উদাহরণ:
+
+AI Application
+      │
+      │ MCP
+      ↓
+Local MCP Server
+      │
+      ↓
+Local Files
+
+আবার:
+
+AI Application
+      │
+      │ MCP
+      ↓
+Remote MCP Server
+      │
+      ↓
+Company API / Database
+
+অর্থাৎ local এবং remote—দুই ধরনের deployment model সম্ভব, transport/configuration-এর উপর নির্ভর করে।
+
+10. MCP Host কী?
+
+Interview-এ Host concept-ও জানা ভালো।
+
+MCP architecture-এ সাধারণত:
+
+Host
+ └── MCP Client
+       │
+       ↓
+   MCP Server
+
+MCP Host হলো যে AI application/environment MCP integration-এর overall container হিসেবে কাজ করে।
+
+Host-এর ভিতরে MCP Client থাকে।
+
+উদাহরণ হিসেবে একটি AI application-এর architecture:
+
+AI Application / Host
+        │
+        ├── MCP Client → MCP Server A
+        │
+        ├── MCP Client → MCP Server B
+        │
+        └── MCP Client → MCP Server C
+
+একটি Host একাধিক MCP server-এর সাথে multiple MCP connections maintain করতে পারে।
+
+11. Host, Client, Server — সহজভাবে
+
+এই তিনটি মনে রাখার সহজ পদ্ধতি:
+
+Host
+ ↓
+AI application/environment
+
+Client
+ ↓
+MCP connection manage করে
+
+Server
+ ↓
+Capabilities expose করে
+
+আরও concrete:
+
+AI Application
+      │
+      │ contains
+      ↓
+  MCP Client
+      │
+      │ MCP communication
+      ↓
+  MCP Server
+      │
+      ├── Tools
+      ├── Resources
+      └── Prompts
+12. একটি complete example
+
+ধরা যাক একটি company AI assistant আছে।
+
+User বলল:
+
+What is the status of order 12345?
+
+Company system:
+
+Order Management API
+
+MCP Server:
+
+Tool:
+    get_order_status(order_id)
+
+Architecture:
+
+User
+  │
+  │ "What is the status of order 12345?"
+  ↓
+AI Application / Host
+  │
+  ↓
+LLM
+  │
+  │ decides that order information is required
+  ↓
+MCP Client
+  │
+  │ call get_order_status
+  ↓
+MCP Server
+  │
+  ↓
+Order Management API
+  │
+  ↓
+Order Status
+  │
+  ↓
+MCP Server
+  │
+  ↓
+MCP Client
+  │
+  ↓
+LLM
+  │
+  ↓
+Final Answer
+Diagram-এর flow
+
+Step 1 — User request
+
+User order status জানতে চায়।
+
+Step 2 — LLM বুঝে
+
+LLM-এর available tool information থেকে বোঝা যায় যে get_order_status relevant।
+
+Step 3 — MCP Client
+
+AI application-এর MCP Client MCP protocol ব্যবহার করে MCP Server-কে tool call request পাঠায়।
+
+Step 4 — MCP Server
+
+MCP Server request receive করে এবং underlying Order Management API call করে।
+
+Step 5 — Result
+
+API থেকে order status আসে।
+
+Step 6 — LLM
+
+Result AI application-এ ফিরে আসে এবং LLM সেই information ব্যবহার করে natural-language answer তৈরি করে।
+
+এখানে MCP-এর কাজ হলো LLM-এর উত্তর generate করা নয়; বরং AI application এবং external capability-এর মধ্যে standardized connection তৈরি করা।
+
+13. MCP এবং Tool Calling কি একই?
+
+না।
+
+এটা interview-এর জন্য খুব গুরুত্বপূর্ণ distinction।
+
+Tool Calling হলো LLM/application-এর একটি mechanism যেখানে model একটি available tool invoke করার request তৈরি করে।
+
+MCP হলো external tools/data/services expose এবং access করার জন্য একটি standard protocol।
+
+সহজভাবে:
+
+Tool Calling
+    ↓
+"কোন tool call করতে হবে?"
+
+MCP
+    ↓
+"Tool/resource কীভাবে standardized way-তে expose
+এবং communicate করা হবে?"
+
+তাই MCP tool calling-এর replacement হিসেবে দেখার দরকার নেই।
+
+বরং:
+
+LLM
+ ↓
+Tool decision
+ ↓
+MCP Client
+ ↓
+MCP protocol
+ ↓
+MCP Server
+ ↓
+Tool
+
